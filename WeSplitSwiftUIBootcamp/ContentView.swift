@@ -12,7 +12,25 @@ struct ContentView: View {
     @State private var checkAmount = 0.0
     @State private var numberOfPeople = 2
     @State private var tipPercentgae = 20
-    let tipPercentages = [10, 15, 20, 25, 0]
+    @FocusState private var amountIsFocused: Bool
+    
+    let currency: FloatingPointFormatStyle<Double>.Currency = .currency(code: Locale.current.currencyCode ?? "USD")
+    let tipPercentages = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 0]
+    
+    var grandTotal: Double {
+        let tipSelected = Double(tipPercentgae)
+        let tipValue = checkAmount / 100 * tipSelected
+        let total = checkAmount + tipValue
+        
+        return total
+    }
+    
+    var totalPerPerson: Double {
+        let peopleCount = Double(numberOfPeople + 2)
+        let amountPerPerson = grandTotal / peopleCount
+        
+        return amountPerPerson
+    }
     
     var body: some View {
         NavigationView {
@@ -20,8 +38,9 @@ struct ContentView: View {
                 Section {
                     HStack {
                         Text("Amount:")
-                        TextField("Amount", value: $checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                        TextField("Amount", value: $checkAmount, format: currency)
                             .keyboardType(.decimalPad)
+                            .focused($amountIsFocused)
                     } //: HSTACK
                     
                     Picker("Number of people:", selection: $numberOfPeople, content: {
@@ -36,18 +55,48 @@ struct ContentView: View {
                         ForEach(tipPercentages, id: \.self) {
                             Text($0, format: .percent)
                         }
+//                        ForEach(0 ... 100) {
+//                            Text($0, format: .percent)
+//                        }
                     })
-                    .pickerStyle(.inline)
+                    .pickerStyle(.wheel)
+                    //.pickerStyle(.inline)
+                    
                 } header: {
                     Text("How much tip do you want to leave?")
                         .fontWeight(.heavy)
                 }//: SECTION
                 
                 Section {
-                    Text(checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                    Text(grandTotal, format: currency)
+                } header: {
+                    Text("Total Amount:")
+                        .fontWeight(.heavy)
+                }
+                
+                Section {
+                    Text(totalPerPerson, format: currency)
+                } header: {
+                    Text("Amount per person:")
+                        .fontWeight(.heavy)
                 }
             } //: FORM
             .navigationTitle("WeSplit")
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    
+                    Button(action: {
+                        amountIsFocused = false
+                    }, label: {
+                        Text("Done")
+                            .padding(.horizontal)
+                            .foregroundColor(Color.yellow)
+                            .background(Color.blue)
+                            .cornerRadius(4.0)
+                    })
+                }
+            } //: TOOLBAR
         } //: NAVIGATIONVIEW
     } //: BODY
 }
