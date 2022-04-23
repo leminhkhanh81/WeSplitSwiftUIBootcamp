@@ -18,9 +18,34 @@ struct ContentView: View {
         NavigationView {
             Form {
                 Section {
-                    TextField("Amount", value: $checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
-                        .keyboardType(.decimalPad)
+                    HStack {
+                        Text("Amount:")
+                        TextField("Amount", value: $checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                            .keyboardType(.decimalPad)
+                    } //: HSTACK
+                    
+                    Picker("Number of people:", selection: $numberOfPeople, content: {
+                        ForEach(2 ..< 100) {
+                            Text("\($0) people")
+                        }
+                    }) //: PICKER
                 } //: SECTION
+                
+                Section {
+                    Picker("Tip percentage:", selection: $tipPercentgae, content: {
+                        ForEach(tipPercentages, id: \.self) {
+                            Text($0, format: .percent)
+                        }
+                    })
+                    .pickerStyle(.inline)
+                } header: {
+                    Text("How much tip do you want to leave?")
+                        .fontWeight(.heavy)
+                }//: SECTION
+                
+                Section {
+                    Text(checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                }
             } //: FORM
             .navigationTitle("WeSplit")
         } //: NAVIGATIONVIEW
